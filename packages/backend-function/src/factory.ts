@@ -92,8 +92,8 @@ export type FunctionProps = {
 /**
  * Create Lambda functions in the context of an Amplify backend definition
  */
-class FunctionFactory implements ConstructFactory<AmplifyFunction> {
-  private generator: ConstructContainerEntryGenerator;
+export class FunctionFactory implements ConstructFactory<AmplifyFunction> {
+  protected generator: ConstructContainerEntryGenerator;
   /**
    * Create a new AmplifyFunctionFactory
    */
@@ -119,7 +119,7 @@ class FunctionFactory implements ConstructFactory<AmplifyFunction> {
     return constructContainer.getOrCompute(this.generator) as AmplifyFunction;
   };
 
-  private hydrateDefaults = (
+  protected hydrateDefaults = (
     resourceNameValidator?: ResourceNameValidator
   ): HydratedFunctionProps => {
     const name = this.resolveName();
@@ -224,9 +224,17 @@ class FunctionFactory implements ConstructFactory<AmplifyFunction> {
 
 type HydratedFunctionProps = Required<FunctionProps>;
 
-class FunctionGenerator implements ConstructContainerEntryGenerator {
+/**
+ * Generate a container entry for AmplifyFunction
+ */
+export class FunctionGenerator implements ConstructContainerEntryGenerator {
   readonly resourceGroupName = 'function';
 
+  /**
+   * Create a new generator
+   * @param props hydrated props
+   * @param outputStorageStrategy output strategy
+   */
   constructor(
     private readonly props: HydratedFunctionProps,
     private readonly outputStorageStrategy: BackendOutputStorageStrategy<FunctionOutput>
@@ -246,12 +254,23 @@ class FunctionGenerator implements ConstructContainerEntryGenerator {
   };
 }
 
-class AmplifyFunction
+/**
+ * Construct that produces an Amplify Function
+ */
+export class AmplifyFunction
   extends Construct
   implements ResourceProvider<FunctionResources>, ResourceAccessAcceptorFactory
 {
   readonly resources: FunctionResources;
   private readonly functionEnvironmentTranslator: FunctionEnvironmentTranslator;
+  /**
+   * Create a new AmplifyFunction
+   * @param scope construct scope
+   * @param id id
+   * @param props hydrated props
+   * @param backendSecretResolver secret resolver
+   * @param outputStorageStrategy output strategy
+   */
   constructor(
     scope: Construct,
     id: string,
