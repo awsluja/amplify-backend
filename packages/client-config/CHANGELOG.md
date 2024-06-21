@@ -1,5 +1,11 @@
 # @aws-amplify/client-config
 
+## 1.0.5
+
+### Patch Changes
+
+- 20bf679: add AppClientId to OAuth lagecy config
+
 ## 1.0.4
 
 ### Patch Changes
