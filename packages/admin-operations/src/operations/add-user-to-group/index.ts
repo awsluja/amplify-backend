@@ -1,3 +1,4 @@
+import { getAbsolutePathTo } from '../../pathfinder.js';
 import { AdminFunctionFactory } from '../../factory.js';
 import { a } from '@aws-amplify/data-schema';
 /**
@@ -13,7 +14,7 @@ export const addUserToGroup = (
     ['cognito-idp:AdminAddUserToGroup'],
     {
       name: customFunctionName,
-      entry: './add-user-to-group/handler.ts',
+      entry: getAbsolutePathTo('handler.ts'),
     },
     new Error().stack
   );
