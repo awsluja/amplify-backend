@@ -14,7 +14,7 @@ export const addUserToGroup = (
     ['cognito-idp:AdminAddUserToGroup'],
     {
       name: customFunctionName,
-      entry: getEntryFileForOperation('add-user-to-group', 'handler.ts'),
+      entry: getEntryFileForOperation('add-user-to-group', 'handler.js'),
     },
     new Error().stack
   );
