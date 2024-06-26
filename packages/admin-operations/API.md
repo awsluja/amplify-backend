@@ -50,7 +50,7 @@ export const AdminSchema: () => {
     }, "arguments", {
     userId: ModelField<string, "required", undefined>;
     groupName: ModelField<string, "required", undefined>;
-    }>, "returnType", ModelField<Nullable<Json>, never, undefined>>, "authorization", Authorization<any, any, any>[]>, "authorization" | "arguments" | "returns" | "handler" | "for", "mutationCustomOperation">;
+    }>, "returnType", ModelField<Nullable<Json>, never, undefined>>, "authorization", Authorization<any, any, any>[]>, "arguments" | "returns" | "authorization" | "handler" | "for", "mutationCustomOperation">;
     AdminListGroupsForUser: CustomOperation<SetTypeSubArg<SetTypeSubArg<SetTypeSubArg<    {
     arguments: null;
     returnType: null;
@@ -59,7 +59,7 @@ export const AdminSchema: () => {
     handlers: null;
     }, "arguments", {
     userId: ModelField<string, "required", undefined>;
-    }>, "returnType", ModelField<Nullable<Json>, never, undefined>>, "authorization", Authorization<any, any, any>[]>, "authorization" | "arguments" | "returns" | "handler" | "for", "queryCustomOperation">;
+    }>, "returnType", ModelField<Nullable<Json>, never, undefined>>, "authorization", Authorization<any, any, any>[]>, "arguments" | "returns" | "authorization" | "handler" | "for", "queryCustomOperation">;
     };
     authorization: [];
     configuration: any;
