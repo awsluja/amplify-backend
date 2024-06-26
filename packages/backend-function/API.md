@@ -4,14 +4,56 @@
 
 ```ts
 
+import { BackendOutputStorageStrategy } from '@aws-amplify/plugin-types';
 import { BackendSecret } from '@aws-amplify/plugin-types';
+import { BackendSecretResolver } from '@aws-amplify/plugin-types';
+import { Construct } from 'constructs';
+import { ConstructContainerEntryGenerator } from '@aws-amplify/plugin-types';
 import { ConstructFactory } from '@aws-amplify/plugin-types';
+import { ConstructFactoryGetInstanceProps } from '@aws-amplify/plugin-types';
+import { FunctionOutput } from '@aws-amplify/backend-output-schemas';
 import { FunctionResources } from '@aws-amplify/plugin-types';
+import { GenerateContainerEntryProps } from '@aws-amplify/plugin-types';
+import { Policy } from 'aws-cdk-lib/aws-iam';
 import { ResourceAccessAcceptorFactory } from '@aws-amplify/plugin-types';
+import { ResourceNameValidator } from '@aws-amplify/plugin-types';
 import { ResourceProvider } from '@aws-amplify/plugin-types';
+import { SsmEnvironmentEntry } from '@aws-amplify/plugin-types';
+
+// @public
+export class AmplifyFunction extends Construct implements ResourceProvider<FunctionResources>, ResourceAccessAcceptorFactory {
+    // Warning: (ae-forgotten-export) The symbol "HydratedFunctionProps" needs to be exported by the entry point index.d.ts
+    constructor(scope: Construct, id: string, props: HydratedFunctionProps, backendSecretResolver: BackendSecretResolver, outputStorageStrategy: BackendOutputStorageStrategy<FunctionOutput>);
+    // (undocumented)
+    getResourceAccessAcceptor: () => {
+        identifier: string;
+        acceptResourceAccess: (policy: Policy, ssmEnvironmentEntries: SsmEnvironmentEntry[]) => void;
+    };
+    // (undocumented)
+    readonly resources: FunctionResources;
+}
 
 // @public
 export const defineFunction: (props?: FunctionProps) => ConstructFactory<ResourceProvider<FunctionResources> & ResourceAccessAcceptorFactory>;
+
+// @public
+export class FunctionFactory implements ConstructFactory<AmplifyFunction> {
+    constructor(props: FunctionProps, callerStack?: string | undefined);
+    // (undocumented)
+    protected generator: ConstructContainerEntryGenerator;
+    getInstance: ({ constructContainer, outputStorageStrategy, resourceNameValidator, }: ConstructFactoryGetInstanceProps) => AmplifyFunction;
+    // (undocumented)
+    protected hydrateDefaults: (resourceNameValidator?: ResourceNameValidator) => HydratedFunctionProps;
+}
+
+// @public
+export class FunctionGenerator implements ConstructContainerEntryGenerator {
+    constructor(props: HydratedFunctionProps, outputStorageStrategy: BackendOutputStorageStrategy<FunctionOutput>);
+    // (undocumented)
+    generateContainerEntry: ({ scope, backendSecretResolver, }: GenerateContainerEntryProps) => AmplifyFunction;
+    // (undocumented)
+    readonly resourceGroupName = "function";
+}
 
 // @public (undocumented)
 export type FunctionProps = {

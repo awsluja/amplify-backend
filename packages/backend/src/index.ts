@@ -18,4 +18,4 @@ export { defineStorage } from '@aws-amplify/backend-storage';
 export { defineFunction } from '@aws-amplify/backend-function';
 
 // Admin Operations
-export { AdminOperations } from '@aws-amplify/admin-operations';
+export { AdminOperations, AdminSchema } from '@aws-amplify/admin-operations';

@@ -5,6 +5,8 @@
 ```ts
 
 import { a } from '@aws-amplify/data-schema';
+import { AdminOperations } from '@aws-amplify/admin-operations';
+import { AdminSchema } from '@aws-amplify/admin-operations';
 import { AuthCfnResources } from '@aws-amplify/plugin-types';
 import { AuthResources } from '@aws-amplify/plugin-types';
 import { AuthRoleName } from '@aws-amplify/plugin-types';
@@ -33,6 +35,10 @@ import { SsmEnvironmentEntry } from '@aws-amplify/plugin-types';
 import { Stack } from 'aws-cdk-lib';
 
 export { a }
+
+export { AdminOperations }
+
+export { AdminSchema }
 
 export { AuthCfnResources }
 

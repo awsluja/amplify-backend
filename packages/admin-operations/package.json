@@ -23,7 +23,5 @@
   "devDependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.303.0"
   },
-  "peerDependencies": {
-    "aws-cdk-lib": "^2.127.0"
-  }
+  "peerDependencies": {}
 }

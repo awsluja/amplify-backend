@@ -1,20 +1,20 @@
 import { getEntryFileForOperation } from '../../pathfinder.js';
 import { AdminFunctionFactory } from '../../factory.js';
 import { a } from '@aws-amplify/data-schema';
+
 /**
  * A mutation that adds users to groups
  * @param customFunctionName provide a custom name for the function that handles the mutation
  * @returns mutation
  */
 export const addUserToGroup = (
-  customFunctionName: string = 'add-user-to-group'
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+  customFunctionName: string = 'admin-add-user-to-group'
+) => {
   const adminAddUserToGroupFunction = new AdminFunctionFactory(
     ['cognito-idp:AdminAddUserToGroup'],
     {
       name: customFunctionName,
-      entry: getEntryFileForOperation('add-user-to-group', 'handler.js'),
+      entry: getEntryFileForOperation('admin-add-user-to-group', 'handler.js'),
     },
     new Error().stack
   );

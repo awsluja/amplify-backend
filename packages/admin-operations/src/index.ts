@@ -1,1 +1,3 @@
-export * as AdminOperations from './operations.js';
+import * as adminOperations from './operations.js';
+export { adminOperations as AdminOperations };
+export { AdminSchema } from './schema.js';
