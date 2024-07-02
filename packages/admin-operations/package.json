@@ -18,10 +18,15 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@aws-amplify/data-schema": "^1.0.0"
+    "@aws-amplify/data-schema": "^1.0.0",
+    "@aws-amplify/backend-output-schemas": "^1.1.0",
+    "@aws-amplify/plugin-types": "^1.0.0"
   },
   "devDependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.303.0"
   },
-  "peerDependencies": {}
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.127.0",
+    "constructs": "^10.0.0"
+  }
 }

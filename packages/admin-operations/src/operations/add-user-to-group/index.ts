@@ -1,6 +1,6 @@
 import { getEntryFileForOperation } from '../../pathfinder.js';
-import { AdminFunctionFactory } from '../../factory.js';
 import { a } from '@aws-amplify/data-schema';
+import { AdminOperationFunctionFactory } from '../../factory_standalone.js';
 
 /**
  * A mutation that adds users to groups
@@ -8,16 +8,13 @@ import { a } from '@aws-amplify/data-schema';
  * @returns mutation
  */
 export const addUserToGroup = (
-  customFunctionName: string = 'admin-add-user-to-group'
+  customFunctionName: string = 'add-user-to-group'
 ) => {
-  const adminAddUserToGroupFunction = new AdminFunctionFactory(
-    ['cognito-idp:AdminAddUserToGroup'],
-    {
-      name: customFunctionName,
-      entry: getEntryFileForOperation('admin-add-user-to-group', 'handler.js'),
-    },
-    new Error().stack
-  );
+  const adminAddUserToGroupFunction = new AdminOperationFunctionFactory({
+    name: customFunctionName,
+    entry: getEntryFileForOperation('add-user-to-group', 'handler.js'),
+    actions: ['cognito-idp:AdminAddUserToGroup'],
+  });
   return a
     .mutation()
     .arguments({
