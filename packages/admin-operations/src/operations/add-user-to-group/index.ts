@@ -4,7 +4,7 @@ import { AdminOperationFunctionFactory } from '../../factory_standalone.js';
 
 /**
  * A mutation that adds users to groups
- * @param customFunctionName provide a custom name for the function that handles the mutation
+ * @param customFunctionName - provide a custom name for the function that handles the mutation
  * @returns mutation
  */
 export const addUserToGroup = (

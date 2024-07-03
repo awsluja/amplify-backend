@@ -3,7 +3,7 @@ import { AdminFunctionFactory } from '../../factory.js';
 import { a } from '@aws-amplify/data-schema';
 /**
  * A query that gets all the groups for a user.
- * @param customFunctionName provide a custom name for the function that handles the mutation
+ * @param customFunctionName - provide a custom name for the function that handles the mutation
  * @returns query
  */
 export const listGroupsForUser = (
