@@ -76,3 +76,14 @@ export type AuthRoleName = keyof Pick<
   AuthResources,
   'authenticatedUserIamRole' | 'unauthenticatedUserIamRole'
 >;
+
+/**
+ * Auth referenced resources
+ */
+export type ReferenceAuthResources = {
+  userPool: IUserPool;
+  userPoolClient: IUserPoolClient;
+  authenticatedUserIamRole: IRole;
+  unauthenticatedUserIamRole: IRole;
+  identityPoolId: string;
+};

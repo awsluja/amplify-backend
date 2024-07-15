@@ -1,29 +1,27 @@
 import { Construct } from 'constructs';
-import { aws_cognito } from 'aws-cdk-lib';
+import { Stack, aws_cognito, aws_iam } from 'aws-cdk-lib';
 import {
-  AuthResources,
-  // BackendOutputStorageStrategy,
+  BackendOutputStorageStrategy,
+  ReferenceAuthResources,
   ResourceProvider,
 } from '@aws-amplify/plugin-types';
-import { CfnUserPool, UserPool } from 'aws-cdk-lib/aws-cognito';
+import { AuthOutput, authOutputKey } from '@aws-amplify/backend-output-schemas';
+import {
+  AttributionMetadataStorage,
+  StackMetadataBackendOutputStorageStrategy,
+} from '@aws-amplify/backend-output-storage';
+import * as path from 'path';
+import { ReferenceAuthProps } from './types';
 
-export type ReferenceAuthProps = {
-  userPoolId: string; // OR ARN
-  identityPoolId: string; // OR ARN
-  authRoleArn: string;
-  authRoleName: string;
-  unauthRoleArn: string;
-  unauthRoleName: string;
-};
-
+const authStackType = 'auth-Cognito';
 /**
- * Hello world construct implementation
+ * Reference Auth construct for using external auth resources
  */
-export class ReferenceAuthConstruct
+export class AmplifyReferenceAuth
   extends Construct
-  implements ResourceProvider<AuthResources>
+  implements ResourceProvider<ReferenceAuthResources>
 {
-  resources: AuthResources;
+  resources: ReferenceAuthResources;
 
   /**
    * Create a new AmplifyConstruct
@@ -31,25 +29,56 @@ export class ReferenceAuthConstruct
   constructor(scope: Construct, id: string, props: ReferenceAuthProps) {
     super(scope, id);
 
-    this.resources.userPool = aws_cognito.UserPool.fromUserPoolId(
-      this,
-      'UserPool',
-      props.userPoolId
+    this.resources = {
+      userPool: aws_cognito.UserPool.fromUserPoolId(
+        this,
+        'UserPool',
+        props.userPoolId
+      ),
+      userPoolClient: aws_cognito.UserPoolClient.fromUserPoolClientId(
+        this,
+        'UserPoolClient',
+        props.userPoolClientId
+      ),
+      authenticatedUserIamRole: aws_iam.Role.fromRoleArn(
+        this,
+        'authenticatedUserRole',
+        props.authRoleArn
+      ),
+      unauthenticatedUserIamRole: aws_iam.Role.fromRoleArn(
+        this,
+        'unauthenticatedUserRole',
+        props.unauthRoleArn
+      ),
+      identityPoolId: props.identityPoolId,
+    };
+
+    this.storeOutput(props.outputStorageStrategy);
+    new AttributionMetadataStorage().storeAttributionMetadata(
+      Stack.of(this),
+      authStackType,
+      path.resolve(__dirname, '..', 'package.json')
     );
-    // TODO: does this even work, can we get this data from import
-    const userpoolcfn = (this.resources.userPool as UserPool).node
-      .defaultChild as CfnUserPool;
-    userpoolcfn.mfaConfiguration;
-
-    // TODO: if above doesn't work, we want to see if we can async fetch that info (describeUserPool)
-    // and auto-fill it
-    // if so, TODO: figure out if we can make that call, and where we can do it/how
-
-    // if all we need is IdentityPoolID, this is fine
-    // can we get the allowUnauthenticatedIdentities flag from it?
-    // this.resources.cfnResources.cfnIdentityPool = IdentityPool =/= cfnIdentityPool
-
-    this.resources.userPoolClient =
-      aws_cognito.UserPoolClient.fromUserPoolClientId(this, 'UserPoolClient');
   }
+
+  /**
+   * Stores auth output using the provided strategy
+   */
+  private storeOutput = (
+    outputStorageStrategy: BackendOutputStorageStrategy<AuthOutput> = new StackMetadataBackendOutputStorageStrategy(
+      Stack.of(this)
+    )
+  ): void => {
+    // these properties cannot be overwritten
+    const output: AuthOutput['payload'] = {
+      userPoolId: this.resources.userPool.userPoolId,
+      webClientId: this.resources.userPoolClient.userPoolClientId,
+      identityPoolId: this.resources.identityPoolId,
+      authRegion: Stack.of(this).region,
+    };
+    outputStorageStrategy.addBackendOutputEntry(authOutputKey, {
+      version: '1',
+      payload: output,
+    });
+  };
 }

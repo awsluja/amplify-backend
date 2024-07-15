@@ -1,26 +1,17 @@
 import { describe, it } from 'node:test';
-import { AmplifyConstruct } from './construct.js';
+import { AmplifyReferenceAuth } from './index.js';
 import { App, Stack } from 'aws-cdk-lib';
-import { Template } from 'aws-cdk-lib/assertions';
 
 void describe('AmplifyConstruct', () => {
   void it('creates a queue if specified', () => {
     const app = new App();
     const stack = new Stack(app);
-    new AmplifyConstruct(stack, 'test', {
-      includeQueue: true,
+    new AmplifyReferenceAuth(stack, 'test', {
+      authRoleArn: 'authRoleArn',
+      unauthRoleArn: 'unauthRoleArn',
+      identityPoolId: 'identityPoolId',
+      userPoolClientId: 'userPoolClientId',
+      userPoolId: 'userPoolId',
     });
-    const template = Template.fromStack(stack);
-    template.resourceCountIs('AWS::SQS::Queue', 1);
-  });
-
-  void it('does nothing if queue is false', () => {
-    const app = new App();
-    const stack = new Stack(app);
-    new AmplifyConstruct(stack, 'test', {
-      includeQueue: false,
-    });
-    const template = Template.fromStack(stack);
-    template.resourceCountIs('AWS::SQS::Queue', 0);
   });
 });

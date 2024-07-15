@@ -7,6 +7,7 @@ import {
   ConstructFactory,
   ConstructFactoryGetInstanceProps,
   GenerateContainerEntryProps,
+  ReferenceAuthResources,
   ResourceProvider,
 } from '@aws-amplify/plugin-types';
 import {
@@ -28,6 +29,7 @@ import { convertFunctionNameMapToCDK } from './convert_functions.js';
 import {
   ProvidedAuthConfig,
   buildConstructFactoryProvidedAuthConfig,
+  buildConstructFactoryProvidedReferenceAuthConfig,
   convertAuthorizationModesToCDK,
   isUsingDefaultApiKeyAuth,
 } from './convert_authorization_modes.js';
@@ -101,7 +103,14 @@ export class DataFactory implements ConstructFactory<AmplifyData> {
               'AuthResources'
             )
             ?.getInstance(props)
-        ),
+        ) ??
+          buildConstructFactoryProvidedReferenceAuthConfig(
+            props.constructContainer
+              .getConstructFactory<ResourceProvider<ReferenceAuthResources>>(
+                'ReferenceAuthResources'
+              )
+              ?.getInstance(props)
+          ),
         props,
         outputStorageStrategy
       );
