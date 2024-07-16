@@ -198,6 +198,6 @@ const roleNameIsAuthRoleName = (roleName: string): roleName is AuthRoleName => {
  * Provide the settings that will be used for authentication.
  */
 export const referenceAuth = (
-  props: ReferenceAuthProps
+  props: AmplifyReferenceAuthProps
 ): ConstructFactory<BackendReferenceAuth> =>
   new AmplifyReferenceAuthFactory(props, new Error().stack);
