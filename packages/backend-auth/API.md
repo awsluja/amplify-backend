@@ -128,7 +128,7 @@ export type OidcProviderFactoryProps = Omit<OidcProviderProps, 'clientId' | 'cli
 };
 
 // @public
-export const referenceAuth: (props: ReferenceAuthProps) => ConstructFactory<BackendReferenceAuth>;
+export const referenceAuth: (props: AmplifyReferenceAuthProps) => ConstructFactory<BackendReferenceAuth>;
 
 // (No @packageDocumentation comment for this package)
 
