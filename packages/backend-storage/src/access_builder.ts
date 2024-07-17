@@ -105,12 +105,19 @@ const getUserRoleResourceAccessAcceptor = (
   getInstanceProps: ConstructFactoryGetInstanceProps,
   roleName: AuthRoleName | string
 ) => {
-  const resourceAccessAcceptor = getInstanceProps.constructContainer
-    .getConstructFactory<
-      ResourceProvider & ResourceAccessAcceptorFactory<AuthRoleName | string>
-    >('AuthResources')
-    ?.getInstance(getInstanceProps)
-    .getResourceAccessAcceptor(roleName);
+  const resourceAccessAcceptor =
+    getInstanceProps.constructContainer
+      .getConstructFactory<
+        ResourceProvider & ResourceAccessAcceptorFactory<AuthRoleName | string>
+      >('AuthResources')
+      ?.getInstance(getInstanceProps)
+      .getResourceAccessAcceptor(roleName) ??
+    getInstanceProps.constructContainer
+      .getConstructFactory<
+        ResourceProvider & ResourceAccessAcceptorFactory<AuthRoleName | string>
+      >('ReferenceAuthResources')
+      ?.getInstance(getInstanceProps)
+      .getResourceAccessAcceptor(roleName);
   if (!resourceAccessAcceptor) {
     throw new Error(
       `Cannot specify auth access for ${
