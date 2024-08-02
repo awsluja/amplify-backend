@@ -1,5 +1,11 @@
 # @aws-amplify/platform-core
 
+## 1.0.5
+
+### Patch Changes
+
+- 320a86d: wrap getaddrinfo ENOTFOUND errors in AmplifyUserError
+
 ## 1.0.4
 
 ### Patch Changes
