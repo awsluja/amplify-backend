@@ -1,5 +1,13 @@
 # @aws-amplify/backend-deployer
 
+## 1.0.4
+
+### Patch Changes
+
+- 489d16e: throw child process error if no stderr generated during CDK cli execution
+- Updated dependencies [320a86d]
+  - @aws-amplify/platform-core@1.0.5
+
 ## 1.0.3
 
 ### Patch Changes
