@@ -17,6 +17,12 @@ import {
 import { HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
 import { GetRoleCommand, IAMClient } from '@aws-sdk/client-iam';
 import { AmplifyClient } from '@aws-sdk/client-amplify';
+import {
+  DeleteMessageCommand,
+  ReceiveMessageCommand,
+  SQSClient,
+} from '@aws-sdk/client-sqs';
+import { e2eToolingClientConfig } from '../e2e_tooling_client_config.js';
 
 /**
  * Creates test projects with data, storage, and auth categories.
@@ -36,6 +42,7 @@ export class DataStorageAuthWithTriggerTestProjectCreator
     private readonly lambdaClient: LambdaClient,
     private readonly s3Client: S3Client,
     private readonly iamClient: IAMClient,
+    private readonly sqsClient: SQSClient,
     private readonly resourceFinder: DeployedResourcesFinder
   ) {}
 
@@ -53,6 +60,7 @@ export class DataStorageAuthWithTriggerTestProjectCreator
       this.lambdaClient,
       this.s3Client,
       this.iamClient,
+      this.sqsClient,
       this.resourceFinder
     );
     await fs.cp(
@@ -118,6 +126,7 @@ class DataStorageAuthWithTriggerTestProject extends TestProjectBase {
     private readonly lambdaClient: LambdaClient,
     private readonly s3Client: S3Client,
     private readonly iamClient: IAMClient,
+    private readonly sqsClient: SQSClient,
     private readonly resourceFinder: DeployedResourcesFinder
   ) {
     super(
@@ -140,11 +149,14 @@ class DataStorageAuthWithTriggerTestProject extends TestProjectBase {
       amplifySharedSecretNameKey in environment
         ? environment[amplifySharedSecretNameKey]
         : createAmplifySharedSecretName();
-    const sharedSecretEnvObject = {
+    const { region } = e2eToolingClientConfig;
+    const env = {
       [amplifySharedSecretNameKey]: this.amplifySharedSecret,
+      AWS_REGION: region ?? '',
     };
+
     await this.setUpDeployEnvironment(backendIdentifier);
-    await super.deploy(backendIdentifier, sharedSecretEnvObject);
+    await super.deploy(backendIdentifier, env);
   }
 
   /**
@@ -212,10 +224,17 @@ class DataStorageAuthWithTriggerTestProject extends TestProjectBase {
       (name) => name.includes('funcWithAwsSdk')
     );
 
+    const funcWithSchedule = await this.resourceFinder.findByBackendIdentifier(
+      backendId,
+      'AWS::Lambda::Function',
+      (name) => name.includes('funcWithSchedule')
+    );
+
     assert.equal(defaultNodeLambda.length, 1);
     assert.equal(node16Lambda.length, 1);
     assert.equal(funcWithSsm.length, 1);
     assert.equal(funcWithAwsSdk.length, 1);
+    assert.equal(funcWithSchedule.length, 1);
 
     const expectedResponse = {
       s3TestContent: 'this is some test content',
@@ -228,6 +247,8 @@ class DataStorageAuthWithTriggerTestProject extends TestProjectBase {
     await this.checkLambdaResponse(node16Lambda[0], expectedResponse);
     await this.checkLambdaResponse(funcWithSsm[0], 'It is working');
     await this.checkLambdaResponse(funcWithAwsSdk[0], 'It is working');
+
+    await this.assertScheduleInvokesFunction(backendId);
 
     const bucketName = await this.resourceFinder.findByBackendIdentifier(
       backendId,
@@ -421,6 +442,44 @@ class DataStorageAuthWithTriggerTestProject extends TestProjectBase {
         return false;
       }
       throw err;
+    }
+  };
+
+  private assertScheduleInvokesFunction = async (
+    backendId: BackendIdentifier
+  ) => {
+    const TIMEOUT_MS = 1000 * 60 * 2; // 2 minutes
+    const startTime = Date.now();
+    let messageCount = 0;
+
+    const queue = await this.resourceFinder.findByBackendIdentifier(
+      backendId,
+      'AWS::SQS::Queue',
+      (name) => name.includes('testFuncQueue')
+    );
+
+    // wait for schedule to invoke the function one time for it to send a message
+    while (Date.now() - startTime < TIMEOUT_MS && messageCount < 1) {
+      const response = await this.sqsClient.send(
+        new ReceiveMessageCommand({
+          QueueUrl: queue[0],
+          WaitTimeSeconds: 20,
+        })
+      );
+
+      if (response.Messages) {
+        messageCount += response.Messages.length;
+
+        // delete messages afterwards
+        for (const message of response.Messages) {
+          await this.sqsClient.send(
+            new DeleteMessageCommand({
+              QueueUrl: queue[0],
+              ReceiptHandle: message.ReceiptHandle,
+            })
+          );
+        }
+      }
     }
   };
 }

@@ -1,5 +1,27 @@
 # @aws-amplify/deployed-backend-client
 
+## 1.2.0
+
+### Minor Changes
+
+- 1aef2c2: wrap CloudFormation client stack does not exist errors in AmplifyUserError
+
+### Patch Changes
+
+- Updated dependencies [2294683]
+  - @aws-amplify/platform-core@1.0.4
+
+## 1.1.0
+
+### Minor Changes
+
+- c784e40: Catch and wrap DeploymentInProgress exception while generating artifacts
+
+### Patch Changes
+
+- Updated dependencies [c784e40]
+  - @aws-amplify/platform-core@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes

@@ -12,10 +12,15 @@ import { AmplifyPrompter, format, printer } from '@aws-amplify/cli-core';
 import { EventHandler, SandboxCommand } from './sandbox_command.js';
 import { createSandboxCommand } from './sandbox_command_factory.js';
 import { SandboxDeleteCommand } from './sandbox-delete/sandbox_delete_command.js';
-import { Sandbox, SandboxSingletonFactory } from '@aws-amplify/sandbox';
+import {
+  Sandbox,
+  SandboxFunctionStreamingOptions,
+  SandboxSingletonFactory,
+} from '@aws-amplify/sandbox';
 import { createSandboxSecretCommand } from './sandbox-secret/sandbox_secret_command_factory.js';
 import { ClientConfigGeneratorAdapter } from '../../client-config/client_config_generator_adapter.js';
 import { CommandMiddleware } from '../../command_middleware.js';
+import { PackageManagerController } from '@aws-amplify/plugin-types';
 
 mock.method(fsp, 'mkdir', () => Promise.resolve());
 
@@ -48,6 +53,11 @@ void describe('sandbox command', () => {
   );
   const sandboxProfile = 'test-sandbox';
 
+  const allowsSignalPropagationMock = mock.fn(() => true);
+  const packageManagerControllerMock = {
+    allowsSignalPropagation: allowsSignalPropagationMock,
+  } as unknown as PackageManagerController;
+
   beforeEach(async () => {
     const sandboxFactory = new SandboxSingletonFactory(
       () =>
@@ -69,6 +79,7 @@ void describe('sandbox command', () => {
       [sandboxDeleteCommand, createSandboxSecretCommand()],
       clientConfigGeneratorAdapterMock,
       commandMiddleware,
+      packageManagerControllerMock,
       () => ({
         successfulDeployment: [clientConfigGenerationMock],
         successfulDeletion: [clientConfigDeletionMock],
@@ -118,6 +129,9 @@ void describe('sandbox command', () => {
     assert.match(output, /--outputs-format/);
     assert.match(output, /--outputs-out-dir/);
     assert.match(output, /--once/);
+    assert.match(output, /--stream-function-logs/);
+    assert.match(output, /--logs-filter/);
+    assert.match(output, /--logs-out-file/);
     assert.equal(mockHandleProfile.mock.callCount(), 0);
   });
 
@@ -225,6 +239,39 @@ void describe('sandbox command', () => {
     assert.equal(sandboxDeleteMock.mock.callCount(), 0);
   });
 
+  void it('Does not prompt for deleting the sandbox if package manager does not allow signal propagation', async (contextual) => {
+    allowsSignalPropagationMock.mock.mockImplementationOnce(() => false);
+
+    // Mock process and extract the sigint handler after calling the sandbox command
+    const processSignal = contextual.mock.method(process, 'on', () => {
+      /* no op */
+    });
+    const sandboxStartMock = contextual.mock.method(
+      sandbox,
+      'start',
+      async () => Promise.resolve()
+    );
+
+    const printerMock = contextual.mock.method(printer, 'print', () => {});
+
+    await commandRunner.runCommand('sandbox');
+
+    // Similar to the previous test's 0ms timeout. Without this tests in github action are failing
+    // but working locally
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const sigIntHandlerFn = processSignal.mock.calls[0].arguments[1];
+    if (sigIntHandlerFn) sigIntHandlerFn();
+
+    assert.equal(sandboxStartMock.mock.callCount(), 1);
+    assert.equal(printerMock.mock.callCount(), 1);
+    assert.equal(
+      printerMock.mock.calls[0].arguments[0],
+      `Stopping the sandbox process. To delete the sandbox, run ${format.normalizeAmpxCommand(
+        'sandbox delete'
+      )}`
+    );
+  });
+
   void it('starts sandbox with user provided invalid AWS profile', async () => {
     const profileErr = new Error('some profile error');
     mockHandleProfile.mock.mockImplementationOnce(() => {
@@ -265,6 +312,7 @@ void describe('sandbox command', () => {
       [],
       clientConfigGeneratorAdapterMock,
       commandMiddleware,
+      packageManagerControllerMock,
       undefined
     );
     const parser = yargs().command(sandboxCommand as unknown as CommandModule);
@@ -341,7 +389,7 @@ void describe('sandbox command', () => {
     );
   });
 
-  void it('--once flag is mutually exclusive with dir-to-watch & exclude', async () => {
+  void it('--once flag is mutually exclusive with dir-to-watch, exclude and stream-function-logs', async () => {
     assert.match(
       await commandRunner.runCommand(
         'sandbox --once --dir-to-watch nonExistentDir'
@@ -351,6 +399,32 @@ void describe('sandbox command', () => {
     assert.match(
       await commandRunner.runCommand('sandbox --once --exclude test'),
       /Arguments once and exclude are mutually exclusive/
+    );
+    assert.match(
+      await commandRunner.runCommand('sandbox --once --stream-function-logs'),
+      /Arguments once and stream-function-logs are mutually exclusive/
+    );
+  });
+
+  void it('fails if --logs-out-file is provided without enabling --stream-function-logs', async () => {
+    assert.match(
+      await commandRunner.runCommand('sandbox --logs-out-file someFile'),
+      /Missing dependent arguments:\n logs-out-file -> stream-function-logs/
+    );
+  });
+
+  void it('starts sandbox with log watching options', async () => {
+    await commandRunner.runCommand(
+      'sandbox --stream-function-logs --logs-filter func1 --logs-filter func2 --logs-out-file someFile'
+    );
+    assert.equal(sandboxStartMock.mock.callCount(), 1);
+    assert.deepStrictEqual(
+      sandboxStartMock.mock.calls[0].arguments[0].functionStreamingOptions,
+      {
+        enabled: true,
+        logsFilters: ['func1', 'func2'],
+        logsOutFile: 'someFile',
+      } as SandboxFunctionStreamingOptions
     );
   });
 });

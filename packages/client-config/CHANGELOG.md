@@ -1,5 +1,32 @@
 # @aws-amplify/client-config
 
+## 1.1.2
+
+### Patch Changes
+
+- 1aef2c2: wrap CloudFormation client stack does not exist errors in AmplifyUserError
+- Updated dependencies [2294683]
+- Updated dependencies [1aef2c2]
+  - @aws-amplify/platform-core@1.0.4
+  - @aws-amplify/deployed-backend-client@1.2.0
+  - @aws-amplify/model-generator@1.0.3
+
+## 1.1.1
+
+### Patch Changes
+
+- c784e40: Catch and wrap DeploymentInProgress exception while generating artifacts
+- Updated dependencies [c784e40]
+  - @aws-amplify/deployed-backend-client@1.1.0
+  - @aws-amplify/model-generator@1.0.2
+  - @aws-amplify/platform-core@1.0.3
+
+## 1.1.0
+
+### Minor Changes
+
+- ebbbb60: Fix a case where auth password policies could not be parsed by upstream frontend components due to absent defaults.
+
 ## 1.0.5
 
 ### Patch Changes

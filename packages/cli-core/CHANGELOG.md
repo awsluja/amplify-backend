@@ -1,5 +1,19 @@
 # @aws-amplify/cli-core
 
+## 1.1.1
+
+### Patch Changes
+
+- 697bc8a: Prevent CTRL-C handling for yarn classic package manager
+- Updated dependencies [c784e40]
+  - @aws-amplify/platform-core@1.0.3
+
+## 1.1.0
+
+### Minor Changes
+
+- 8f23287: feat: add support for function logs streaming to sandbox
+
 ## 1.0.0
 
 ### Major Changes

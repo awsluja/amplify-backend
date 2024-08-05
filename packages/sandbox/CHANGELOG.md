@@ -1,5 +1,40 @@
 # @aws-amplify/sandbox
 
+## 1.1.1
+
+### Patch Changes
+
+- 09b4cc1: Correctly classify credentials related errors while making sdk calls to SSM
+- Updated dependencies [697bc8a]
+- Updated dependencies [c784e40]
+  - @aws-amplify/backend-deployer@1.0.2
+  - @aws-amplify/cli-core@1.1.1
+  - @aws-amplify/deployed-backend-client@1.1.0
+  - @aws-amplify/client-config@1.1.1
+  - @aws-amplify/platform-core@1.0.3
+
+## 1.1.0
+
+### Minor Changes
+
+- 8f23287: feat: add support for function logs streaming to sandbox
+
+### Patch Changes
+
+- Updated dependencies [8f23287]
+- Updated dependencies [ebbbb60]
+  - @aws-amplify/cli-core@1.1.0
+  - @aws-amplify/client-config@1.1.0
+
+## 1.0.6
+
+### Patch Changes
+
+- 44ca7d7: refactor top level cli error handling
+- Updated dependencies [44ca7d7]
+- Updated dependencies [ca92f23]
+  - @aws-amplify/platform-core@1.0.2
+
 ## 1.0.5
 
 ### Patch Changes

@@ -12,6 +12,10 @@ import {
   ObjectAccumulatorPropertyAlreadyExistsError,
   ObjectAccumulatorVersionMismatchError,
 } from '@aws-amplify/platform-core';
+import {
+  BackendOutputClientError,
+  BackendOutputClientErrorType,
+} from '@aws-amplify/deployed-backend-client';
 
 /**
  * Right now this is mostly a stub. This will become a translation layer between backend output and frontend config
@@ -31,9 +35,40 @@ export class UnifiedClientConfigGenerator implements ClientConfigGenerator {
    * Fetch all backend output, invoke each ClientConfigContributor on the result and merge into a single config object
    */
   generateClientConfig = async (): Promise<ClientConfig> => {
-    const backendOutput = unifiedBackendOutputSchema.parse(
-      await this.fetchOutput()
-    );
+    let output;
+    try {
+      output = await this.fetchOutput();
+    } catch (error) {
+      if (
+        error instanceof BackendOutputClientError &&
+        error.code === BackendOutputClientErrorType.DEPLOYMENT_IN_PROGRESS
+      ) {
+        throw new AmplifyUserError(
+          'DeploymentInProgressError',
+          {
+            message: 'Deployment is currently in progress.',
+            resolution: 'Re-run this command once the deployment completes.',
+          },
+          error
+        );
+      }
+      if (
+        error instanceof BackendOutputClientError &&
+        error.code === BackendOutputClientErrorType.NO_STACK_FOUND
+      ) {
+        throw new AmplifyUserError(
+          'StackDoesNotExistError',
+          {
+            message: 'Stack does not exist.',
+            resolution:
+              'Ensure the CloudFormation stack ID or Amplify App ID and branch specified are correct and exists, then re-run this command.',
+          },
+          error
+        );
+      }
+      throw error;
+    }
+    const backendOutput = unifiedBackendOutputSchema.parse(output);
 
     const accumulator = new ObjectAccumulator<ClientConfig>({});
 

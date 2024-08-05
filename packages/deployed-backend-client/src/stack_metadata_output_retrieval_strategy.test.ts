@@ -1,6 +1,7 @@
 import { describe, it, mock } from 'node:test';
 import {
   CloudFormationClient,
+  CloudFormationServiceException,
   DescribeStacksCommand,
   GetTemplateSummaryCommand,
 } from '@aws-sdk/client-cloudformation';
@@ -11,6 +12,10 @@ import {
   authOutputKey,
   graphqlOutputKey,
 } from '@aws-amplify/backend-output-schemas';
+import {
+  BackendOutputClientError,
+  BackendOutputClientErrorType,
+} from './backend_output_client_factory.js';
 
 void describe('StackMetadataBackendOutputRetrievalStrategy', () => {
   void describe('fetchBackendOutput', () => {
@@ -35,9 +40,13 @@ void describe('StackMetadataBackendOutputRetrievalStrategy', () => {
         stackNameResolverMock
       );
 
-      await assert.rejects(retrievalStrategy.fetchBackendOutput(), {
-        message: 'Stack template metadata is not a string',
-      });
+      await assert.rejects(
+        retrievalStrategy.fetchBackendOutput(),
+        new BackendOutputClientError(
+          BackendOutputClientErrorType.METADATA_RETRIEVAL_ERROR,
+          'Stack template metadata is not a string'
+        )
+      );
     });
 
     void it('throws if stack does not have outputs', async () => {
@@ -74,9 +83,13 @@ void describe('StackMetadataBackendOutputRetrievalStrategy', () => {
         stackNameResolverMock
       );
 
-      await assert.rejects(retrievalStrategy.fetchBackendOutput(), {
-        message: 'Stack outputs are undefined',
-      });
+      await assert.rejects(
+        retrievalStrategy.fetchBackendOutput(),
+        new BackendOutputClientError(
+          BackendOutputClientErrorType.NO_OUTPUTS_FOUND,
+          'Stack outputs are undefined'
+        )
+      );
     });
 
     void it('throws if sandbox stack is still in progress', async () => {
@@ -124,10 +137,13 @@ void describe('StackMetadataBackendOutputRetrievalStrategy', () => {
         stackNameResolverMock
       );
 
-      await assert.rejects(retrievalStrategy.fetchBackendOutput(), {
-        message:
-          'This sandbox deployment is in progress. Re-run this command once the deployment completes.',
-      });
+      await assert.rejects(
+        retrievalStrategy.fetchBackendOutput(),
+        new BackendOutputClientError(
+          BackendOutputClientErrorType.DEPLOYMENT_IN_PROGRESS,
+          'This sandbox deployment is in progress. Re-run this command once the deployment completes.'
+        )
+      );
     });
 
     void it('throws if branch stack is still in progress', async () => {
@@ -175,10 +191,13 @@ void describe('StackMetadataBackendOutputRetrievalStrategy', () => {
         stackNameResolverMock
       );
 
-      await assert.rejects(retrievalStrategy.fetchBackendOutput(), {
-        message:
-          'This branch deployment is in progress. Re-run this command once the deployment completes.',
-      });
+      await assert.rejects(
+        retrievalStrategy.fetchBackendOutput(),
+        new BackendOutputClientError(
+          BackendOutputClientErrorType.DEPLOYMENT_IN_PROGRESS,
+          'This branch deployment is in progress. Re-run this command once the deployment completes.'
+        )
+      );
     });
 
     void it('throws if stack is still in progress - defaults to sandbox', async () => {
@@ -256,6 +275,52 @@ void describe('StackMetadataBackendOutputRetrievalStrategy', () => {
           }
           return false;
         }
+      );
+    });
+
+    void it('throws if stack does not exist', async () => {
+      const cfnClientMock = {
+        send: mock.fn((command) => {
+          if (command instanceof GetTemplateSummaryCommand) {
+            throw new CloudFormationServiceException({
+              $fault: 'client',
+              $metadata: {},
+              name: 'ValidationError',
+              message: 'Stack with id stackThatDoesNotExist does not exist',
+            });
+          } else if (command instanceof DescribeStacksCommand) {
+            return {
+              Stacks: [
+                {
+                  Outputs: [
+                    {
+                      OutputKey: 'testName1',
+                      OutputValue: 'testValue1',
+                    },
+                  ],
+                },
+              ],
+            };
+          }
+          assert.fail(`Unknown command ${typeof command}`);
+        }),
+      } as unknown as CloudFormationClient;
+
+      const stackNameResolverMock: MainStackNameResolver = {
+        resolveMainStackName: mock.fn(async () => 'stackThatDoesNotExist'),
+      };
+
+      const retrievalStrategy = new StackMetadataBackendOutputRetrievalStrategy(
+        cfnClientMock,
+        stackNameResolverMock
+      );
+
+      await assert.rejects(
+        retrievalStrategy.fetchBackendOutput(),
+        new BackendOutputClientError(
+          BackendOutputClientErrorType.NO_STACK_FOUND,
+          'Stack with id stackThatDoesNotExist does not exist'
+        )
       );
     });
 

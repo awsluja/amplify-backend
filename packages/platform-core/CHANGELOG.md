@@ -1,5 +1,26 @@
 # @aws-amplify/platform-core
 
+## 1.0.4
+
+### Patch Changes
+
+- 2294683: Add missing dependent arguments error in the yargs validations
+
+## 1.0.3
+
+### Patch Changes
+
+- c784e40: Catch and wrap DeploymentInProgress exception while generating artifacts
+- Updated dependencies [697bc8a]
+  - @aws-amplify/plugin-types@1.1.0
+
+## 1.0.2
+
+### Patch Changes
+
+- 44ca7d7: refactor top level cli error handling
+- ca92f23: wrap yargs validation errors in AmplifyUserError
+
 ## 1.0.1
 
 ### Patch Changes

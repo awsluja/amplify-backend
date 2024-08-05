@@ -1,5 +1,63 @@
 # @aws-amplify/backend-cli
 
+## 1.2.2
+
+### Patch Changes
+
+- 1aef2c2: wrap CloudFormation client stack does not exist errors in AmplifyUserError
+- Updated dependencies [b3551c2]
+- Updated dependencies [7af1575]
+- Updated dependencies [bfd6512]
+- Updated dependencies [2294683]
+- Updated dependencies [1aef2c2]
+  - @aws-amplify/backend-deployer@1.0.3
+  - @aws-amplify/platform-core@1.0.4
+  - @aws-amplify/deployed-backend-client@1.2.0
+  - @aws-amplify/model-generator@1.0.3
+  - @aws-amplify/client-config@1.1.2
+
+## 1.2.1
+
+### Patch Changes
+
+- 697bc8a: Prevent CTRL-C handling for yarn classic package manager
+- 3408511: Print all amplfiy package versions when running `ampx info`
+- c784e40: Catch and wrap DeploymentInProgress exception while generating artifacts
+- Updated dependencies [697bc8a]
+- Updated dependencies [09b4cc1]
+- Updated dependencies [c784e40]
+  - @aws-amplify/backend-deployer@1.0.2
+  - @aws-amplify/cli-core@1.1.1
+  - @aws-amplify/sandbox@1.1.1
+  - @aws-amplify/deployed-backend-client@1.1.0
+  - @aws-amplify/model-generator@1.0.2
+  - @aws-amplify/client-config@1.1.1
+  - @aws-amplify/platform-core@1.0.3
+
+## 1.2.0
+
+### Minor Changes
+
+- 8f23287: feat: add support for function logs streaming to sandbox
+
+### Patch Changes
+
+- Updated dependencies [8f23287]
+- Updated dependencies [ebbbb60]
+  - @aws-amplify/cli-core@1.1.0
+  - @aws-amplify/sandbox@1.1.0
+  - @aws-amplify/client-config@1.1.0
+
+## 1.1.1
+
+### Patch Changes
+
+- 44ca7d7: refactor top level cli error handling
+- Updated dependencies [44ca7d7]
+- Updated dependencies [ca92f23]
+  - @aws-amplify/platform-core@1.0.2
+  - @aws-amplify/sandbox@1.0.6
+
 ## 1.1.0
 
 ### Minor Changes
