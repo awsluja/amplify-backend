@@ -1,5 +1,13 @@
 # @aws-amplify/backend
 
+## 1.10.1
+
+### Patch Changes
+
+- 07fe7d4: Allow apiKeyAuthorizationMode to be undefined if defaultAuthorizationMode is apiKey
+- Updated dependencies [07fe7d4]
+  - @aws-amplify/backend-data@1.2.4
+
 ## 1.10.0
 
 ### Minor Changes
